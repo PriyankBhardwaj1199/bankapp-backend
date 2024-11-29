@@ -1,9 +1,6 @@
 package com.app.bank.controller;
 
-import com.app.bank.dto.CreditDebitRequest;
-import com.app.bank.dto.EnquiryRequest;
-import com.app.bank.dto.TransferRequest;
-import com.app.bank.dto.UserDto;
+import com.app.bank.dto.*;
 import com.app.bank.service.UserService;
 import com.app.bank.utility.BankResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -83,5 +80,18 @@ public class UserController {
     @PostMapping("/transfer")
     public BankResponse transferAccount(@RequestBody TransferRequest transferRequest){
         return userService.transferRequest(transferRequest);
+    }
+
+    @Operation(
+            summary = "A login attempt initiated",
+            description = "User initiated a login attempt to his/her account"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Logged in successfully"
+    )
+    @PostMapping("/login")
+    public BankResponse loginAccount(@RequestBody LoginDTO loginDTO){
+        return userService.login(loginDTO);
     }
 }

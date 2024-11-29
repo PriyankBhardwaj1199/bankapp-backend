@@ -1,5 +1,6 @@
 package com.app.bank.serviceImpl;
 
+import com.app.bank.config.JwtTokenProvider;
 import com.app.bank.dto.*;
 import com.app.bank.entity.User;
 import com.app.bank.repository.UserRepository;
@@ -8,6 +9,12 @@ import com.app.bank.service.TransactionService;
 import com.app.bank.service.UserService;
 import com.app.bank.utility.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -23,6 +30,15 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     /**
      * Create an account - save the info of the new user in database
@@ -53,6 +69,8 @@ public class UserServiceImpl implements UserService {
                 .country(userDto.getCountry())
                 .email(userDto.getEmail())
                 .phoneNumber(userDto.getPhoneNumber())
+                .password(passwordEncoder.encode(userDto.getPassword()))
+                .role(Roles.USER.getRole())
                 .alternativePhoneNumber(userDto.getAlternativePhoneNumber())
                 .status(AccountStatus.ACTIVE.getDescription())
                 .accountNumber(AccountUtils.generateAccountNumber(userDto.getFirstName().substring(0, 1).toUpperCase()
@@ -358,5 +376,38 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    @Override
+    public BankResponse login(LoginDTO loginDTO) {
 
+        Authentication authentication= null;
+
+        try {
+
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginDTO.getUsername(),loginDTO.getPassword()
+                    )
+            );
+
+            return BankResponse.builder()
+                    .responseCode(LoginStatus.SUCCESS.getCode())
+                    .responseMessage(jwtTokenProvider.generateToken(authentication))
+                    .build();
+        } catch (BadCredentialsException e) {
+            // Handle invalid credentials
+            return BankResponse.builder()
+                    .responseCode(LoginStatus.INVALID_CREDENTIALS.getCode()) // Set a failure code
+                    .responseMessage(LoginStatus.INVALID_CREDENTIALS.getMessage()) // Notify the user
+                    .build();
+
+        } catch (AuthenticationException e) {
+            // Handle any other authentication-related exception
+            return BankResponse.builder()
+                    .responseCode(LoginStatus.FAILURE.getCode()) // Set a failure code
+                    .responseMessage(LoginStatus.FAILURE.getMessage()) // General error message
+                    .build();
+        }
+
+
+    }
 }

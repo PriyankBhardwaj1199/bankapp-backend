@@ -79,6 +79,18 @@ public class UserDto {
     private String email;
 
     @Schema(
+            name = "Password",
+            description = "The password for the account"
+    )
+    private String password;
+
+    @Schema(
+            name = "Role",
+            description = "The role of the user"
+    )
+    private String role;
+
+    @Schema(
             name = "Phone Number",
             description = "The phone number of the user"
     )
