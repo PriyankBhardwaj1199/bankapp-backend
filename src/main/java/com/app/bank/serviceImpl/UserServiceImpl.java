@@ -3,27 +3,34 @@ package com.app.bank.serviceImpl;
 import com.app.bank.config.JwtTokenProvider;
 import com.app.bank.dto.*;
 import com.app.bank.entity.User;
+import com.app.bank.repository.TransactionRepository;
 import com.app.bank.repository.UserRepository;
 import com.app.bank.service.EmailService;
 import com.app.bank.service.TransactionService;
 import com.app.bank.service.UserService;
 import com.app.bank.utility.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     @Autowired
     private EmailService emailService;
@@ -56,6 +63,14 @@ public class UserServiceImpl implements UserService {
                     .build();
         }
 
+        String roleAssigned = null;
+
+        if (userDto.getRole().equalsIgnoreCase("user")) {
+            roleAssigned = Roles.USER.getRole();
+        } else if (userDto.getRole().equals("admin")){
+            roleAssigned = Roles.ADMIN.getRole();
+        }
+
         User newUser = User.builder()
                 .firstName(userDto.getFirstName())
                 .lastName(userDto.getLastName())
@@ -70,7 +85,7 @@ public class UserServiceImpl implements UserService {
                 .email(userDto.getEmail())
                 .phoneNumber(userDto.getPhoneNumber())
                 .password(passwordEncoder.encode(userDto.getPassword()))
-                .role(Roles.USER.getRole())
+                .role(roleAssigned)
                 .alternativePhoneNumber(userDto.getAlternativePhoneNumber())
                 .status(AccountStatus.ACTIVE.getDescription())
                 .accountNumber(AccountUtils.generateAccountNumber(userDto.getFirstName().substring(0, 1).toUpperCase()
@@ -400,6 +415,9 @@ public class UserServiceImpl implements UserService {
                     .responseMessage(LoginStatus.INVALID_CREDENTIALS.getMessage()) // Notify the user
                     .build();
 
+        } catch (UsernameNotFoundException e) {
+            // Handle user not found
+            throw e;  // Re-throw to be caught by @ControllerAdvice
         } catch (AuthenticationException e) {
             // Handle any other authentication-related exception
             return BankResponse.builder()
@@ -409,5 +427,174 @@ public class UserServiceImpl implements UserService {
         }
 
 
+    }
+
+    @Override
+    public BankResponse deleteAccount(DeleteRequest deleteRequest) {
+
+        // check if account is present or not
+        if(!userRepository.existsByEmail(deleteRequest.getEmail())){
+            return BankResponse.builder()
+                    .responseCode(DeleteAccountResponse.ACCOUNT_NOT_FOUND.getCode())
+                    .responseMessage(DeleteAccountResponse.ACCOUNT_NOT_FOUND.getMessage())
+                    .accountInfo(null)
+                    .build();
+        }
+
+        User deletedUser = userRepository.findByAccountNumber(deleteRequest.getAccountNumber());
+
+        int recordDeleted = userRepository.deleteByAccountNumber(deleteRequest.getAccountNumber());
+
+        if(recordDeleted == 1){
+
+            transactionRepository.deleteByAccountNumber(deleteRequest.getAccountNumber());
+
+            String mailBody = """
+Dear %s,
+
+We hope this message finds you well.
+
+This is to inform you that your account associated with the account number %s has been successfully deleted from our system. If this action was intentional, no further steps are needed.
+
+If you believe this action was in error or have any concerns, please contact us immediately at bankingsystem.email.com.
+
+Thank you for your association with us.
+
+Best regards,
+Banking System
+""".formatted(deletedUser.getFirstName()+" "+deletedUser.getMiddleName()+" "+deletedUser.getLastName(),
+                    deletedUser.getAccountNumber());
+
+            EmailDetails emailDetails = EmailDetails.builder()
+                    .recipient(deleteRequest.getEmail())
+                    .subject("ACCOUNT DELETED")
+                    .message(mailBody)
+                    .build();
+
+            emailService.sendEmailAlert(emailDetails);
+
+            return BankResponse.builder()
+                    .responseCode(DeleteAccountResponse.SUCCESS.getCode())
+                    .responseMessage(DeleteAccountResponse.SUCCESS.getMessage())
+                    .accountInfo(null)
+                    .build();
+        }
+
+        return BankResponse.builder()
+                .responseCode(DeleteAccountResponse.SERVER_ERROR.getCode())
+                .responseMessage(DeleteAccountResponse.SERVER_ERROR.getMessage())
+                .accountInfo(null)
+                .build();
+    }
+
+    @Override
+    public BankResponse updateAccount(UserDto userDto) {
+
+        // check if the user is present in the database
+        if(!userRepository.existsByEmail(userDto.getEmail())){
+            return BankResponse.builder()
+                    .responseCode(UpdateAccountResponse.ACCOUNT_NOT_FOUND.getCode())
+                    .responseMessage(UpdateAccountResponse.ACCOUNT_NOT_FOUND.getMessage())
+                    .accountInfo(null)
+                    .build();
+        }
+
+        Optional<User> userFromDatabase = userRepository.findByEmail(userDto.getEmail());
+
+        if(userFromDatabase.isPresent()){
+            User userToUpdate = userFromDatabase.get();
+
+            userToUpdate.setFirstName(userDto.getFirstName());
+            userToUpdate.setLastName(userDto.getLastName());
+            userToUpdate.setMiddleName(userDto.getMiddleName());
+            userToUpdate.setGender(userDto.getGender());
+            userToUpdate.setAddressLine1(userDto.getAddressLine1());
+            userToUpdate.setAddressLine2(userDto.getAddressLine2());
+            userToUpdate.setCity(userDto.getCity());
+            userToUpdate.setStateOfOrigin(userDto.getStateOfOrigin());
+            userToUpdate.setPinCode(userDto.getPinCode());
+            userToUpdate.setCountry(userDto.getCountry());
+            userToUpdate.setPhoneNumber(userDto.getPhoneNumber());
+            userToUpdate.setAlternativePhoneNumber(userDto.getAlternativePhoneNumber());
+
+            userRepository.save(userToUpdate);
+        }
+
+        return BankResponse.builder()
+                .responseCode(UpdateAccountResponse.SUCCESS.getCode())
+                .responseMessage(UpdateAccountResponse.SUCCESS.getMessage())
+                .accountInfo(null)
+                .build();
+    }
+
+    @Override
+    public BankResponse updatePassword(PasswordRequest passwordRequest) {
+        // check if the user is present in the database
+        if(!userRepository.existsByAccountNumber(passwordRequest.getAccountNumber())){
+            return BankResponse.builder()
+                    .responseCode(UpdateAccountResponse.ACCOUNT_NOT_FOUND.getCode())
+                    .responseMessage(UpdateAccountResponse.ACCOUNT_NOT_FOUND.getMessage())
+                    .accountInfo(null)
+                    .build();
+        }
+
+        Optional<User> userFromDatabase = Optional.ofNullable(userRepository.findByAccountNumber(passwordRequest.getAccountNumber()));
+
+        if(userFromDatabase.isPresent()){
+            User userToUpdate = userFromDatabase.get();
+
+            if(passwordEncoder.matches(passwordRequest.getOldPassword(),userToUpdate.getPassword())){
+
+                userToUpdate.setPassword(passwordEncoder.encode(passwordRequest.getNewPassword()));
+
+                userRepository.save(userToUpdate);
+
+                EmailDetails emailDetails = EmailDetails.builder()
+                        .recipient(userToUpdate.getEmail())
+                        .subject("PASSWORD UPDATED")
+                        .message(
+                                "Dear " + userToUpdate.getFirstName() + ",\n\n" +
+                                        "We wanted to let you know that your account password has been successfully updated. If you did not make this change or believe this to be an error, please contact our support team immediately at support@bankingsystem.com.\n\n" +
+                                        "Important: For your security, we recommend that you review your account settings and ensure that all information is up-to-date.\n\n" +
+                                        "If you need further assistance or wish to change your password again, you can do so by visiting our account settings.\n\n" +
+                                        "Thank you for being a valued member of Banking System.\n\n" +
+                                        "Best regards,\n" +
+                                        "The Banking System Team\n" +
+                                        "support@bankingsystem.com\n\n" +
+                                        "Security Reminder:\n" +
+                                        "If you suspect unauthorized activity on your account, please change your password immediately for security."
+                        )
+                        .build();
+
+                emailService.sendEmailAlert(emailDetails);
+
+                return BankResponse.builder()
+                        .responseCode(UpdateAccountResponse.SUCCESS.getCode())
+                        .responseMessage(UpdateAccountResponse.SUCCESS.getMessage())
+                        .accountInfo(null)
+                        .build();
+            } else {
+                return BankResponse.builder()
+                        .responseCode(UpdateAccountResponse.PASSWORD_MISMATCH.getCode())
+                        .responseMessage(UpdateAccountResponse.PASSWORD_MISMATCH.getMessage())
+                        .accountInfo(null)
+                        .build();
+            }
+
+        }
+
+        return BankResponse.builder()
+                .responseCode(UpdateAccountResponse.SERVER_ERROR.getCode())
+                .responseMessage(UpdateAccountResponse.SERVER_ERROR.getMessage())
+                .accountInfo(null)
+                .build();
+    }
+
+    @Override
+    public ResponseEntity<User> fetchUserAccount(FetchAccount fetchAccount) {
+
+        Optional<User> user = userRepository.findByEmail(fetchAccount.getEmail());
+
+        return user.map(ResponseEntity::ok).orElse(null);
     }
 }

@@ -90,6 +90,7 @@ public class User {
             name = "Account Number",
             description = "The account number of the user's bank account"
     )
+    @Column(unique = true)
     private String accountNumber;
 
     @Schema(

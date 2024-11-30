@@ -32,7 +32,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                     .build();
 
         } else{
-            throw new UsernameNotFoundException("No account found for username"+username);
+            throw new UsernameNotFoundException("No account found for username: "+username);
         }
 
     }

@@ -8,4 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional
 public interface TransactionRepository extends JpaRepository<Transaction,String> {
+
+    int deleteByAccountNumber(String accountNumber);
 }

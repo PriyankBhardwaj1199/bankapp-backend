@@ -1,12 +1,14 @@
 package com.app.bank.controller;
 
 import com.app.bank.dto.*;
+import com.app.bank.entity.User;
 import com.app.bank.service.UserService;
 import com.app.bank.utility.BankResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -92,6 +94,58 @@ public class UserController {
     )
     @PostMapping("/login")
     public BankResponse loginAccount(@RequestBody LoginDTO loginDTO){
-        return userService.login(loginDTO);
+            return userService.login(loginDTO);
+    }
+
+    @Operation(
+            summary = "Delete a user account",
+            description = "Deletes an account and its related transactions from the database"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Record deleted successfully"
+    )
+    @DeleteMapping("/delete")
+    public BankResponse deleteAccount(@RequestBody DeleteRequest deleteRequest){
+        return userService.deleteAccount(deleteRequest);
+    }
+
+    @Operation(
+            summary = "Update the user account",
+            description = "Updates an account of the user"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Record updated successfully"
+    )
+    @PatchMapping("/update")
+    public BankResponse updateAccount(@RequestBody UserDto userDto){
+        return userService.updateAccount(userDto);
+    }
+
+    @Operation(
+            summary = "Update the user account's password",
+            description = "Updates the password of the account"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Password updated successfully"
+    )
+    @PatchMapping("/passwordUpdate")
+    public BankResponse updatePassword(@RequestBody PasswordRequest passwordRequest){
+        return userService.updatePassword(passwordRequest);
+    }
+
+    @Operation(
+            summary = "Fetch the user account's information",
+            description = "Returns the user account information"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Account information fetched successfully"
+    )
+    @GetMapping("/fetchAccount")
+    public ResponseEntity<User> getLoggedInUserAccountInfo(@RequestBody FetchAccount fetchAccount){
+        return userService.fetchUserAccount(fetchAccount);
     }
 }
