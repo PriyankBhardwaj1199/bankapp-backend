@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
 
         if (userDto.getRole().equalsIgnoreCase("user")) {
             roleAssigned = Roles.USER.getRole();
-        } else if (userDto.getRole().equals("admin")){
+        } else if (userDto.getRole().equalsIgnoreCase("admin")){
             roleAssigned = Roles.ADMIN.getRole();
         }
 
