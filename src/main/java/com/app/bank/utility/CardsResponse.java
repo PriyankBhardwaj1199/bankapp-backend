@@ -7,6 +7,9 @@ public enum CardsResponse {
     CARD_ACTIVATED_SUCCESSFULLY(200, "Card activated successfully."),
     CARD_BLOCKED_SUCCESSFULLY(200, "Card blocked successfully."),
     CARD_DEACTIVATED_SUCCESSFULLY(200, "Card deactivated successfully."),
+    CARD_REVOKED_SUCCESSFULLY(200, "Card revoked successfully."),
+    CARD_EXPIRED_SUCCESSFULLY(200, "Card expired successfully."),
+    CARD_DELETED_SUCCESSFULLY(200, "Card removed from records successfully."),
     CARD_PENDING_APPROVAL(200,"Cannot perform the required action, card must be activated first."),
     CARD_BLOCKED(200,"Cannot perform the required action, card is blocked."),
     CARD_EXPIRED(200,"Cannot perform the required action, card is expired."),
@@ -19,8 +22,11 @@ public enum CardsResponse {
     ACCOUNT_NOT_FOUND(404, "Associated account not found."),
     CARD_NOT_FOUND(404, "Card not found."),
     CARD_ALREADY_ACTIVE(409, "Card is already active."),
+    CARD_ALREADY_INACTIVE(409, "Card is already inactive."),
+    CARD_ALREADY_REVOKED(409, "Card is already revoked."),
     CARD_ALREADY_BLOCKED(409, "Card is already blocked."),
     CARD_ALREADY_EXISTS(409, "The requested card already exists with your account."),
+    CARD_ALREADY_EXPIRED(409, "Card is already expired"),
 
     // Server error responses
     INTERNAL_SERVER_ERROR(500, "An internal error occurred while processing the card request."),
