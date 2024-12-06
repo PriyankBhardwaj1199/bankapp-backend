@@ -1,5 +1,6 @@
 package com.app.bank.controller;
 
+import com.app.bank.entity.Cards;
 import com.app.bank.entity.User;
 import com.app.bank.service.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,5 +33,18 @@ public class AdminController {
     @GetMapping("/fetchAllAccount")
     public ResponseEntity<List<User>> getAllUserAccountsInfo(){
         return adminService.fetchAllUserAccounts();
+    }
+
+    @Operation(
+            summary = "Fetch all pending card approval",
+            description = "Returns all pending card information"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "All pending card information fetched successfully"
+    )
+    @GetMapping("/fetchCards")
+    public ResponseEntity<List<Cards>> getAllPendingCardsInfo(){
+        return adminService.fetchAllPendingCards();
     }
 }
