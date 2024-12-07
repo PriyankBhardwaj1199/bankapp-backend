@@ -1,12 +1,12 @@
 package com.app.bank.utility;
 
 public enum AccountStatus {
-    ACTIVE("Account is active and in good standing."),
-    INACTIVE("Account is inactive."),
-    SUSPENDED("Account has been suspended due to violations."),
-    CLOSED("Account has been permanently closed."),
-    PENDING("Account is pending approval."),
-    DEACTIVATED("Account has been voluntarily deactivated by the user.");
+    ACTIVE("ACTIVE"),
+    INACTIVE("INACTIVE"),
+    SUSPENDED("SUSPENDED"),
+    CLOSED("CLOSED"),
+    PENDING("PENDING"),
+    DEACTIVATED("DEACTIVATED");
 
     private final String description;
 
