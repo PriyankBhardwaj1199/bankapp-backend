@@ -1,11 +1,15 @@
 package com.app.bank.service;
 
 import com.app.bank.dto.BankStatementDto;
-import com.app.bank.entity.Transaction;
+import com.app.bank.entity.BankStatement;
+import com.app.bank.utility.BankResponse;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface BankStatementService {
 
-    public List<Transaction> generateStatement(BankStatementDto bankStatementDto);
+    public BankResponse generateStatement(BankStatementDto bankStatementDto);
+
+    ResponseEntity<List<BankStatement>> getAllBankStatement(String accountNumber);
 }

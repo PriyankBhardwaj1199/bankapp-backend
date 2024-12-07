@@ -2,22 +2,26 @@ package com.app.bank.serviceImpl;
 
 import com.app.bank.dto.BankStatementDto;
 import com.app.bank.dto.EmailDetails;
+import com.app.bank.entity.BankStatement;
 import com.app.bank.entity.Transaction;
 import com.app.bank.entity.User;
+import com.app.bank.repository.BankStatementRepository;
 import com.app.bank.repository.TransactionRepository;
 import com.app.bank.repository.UserRepository;
 import com.app.bank.service.BankStatementService;
 import com.app.bank.service.EmailService;
+import com.app.bank.utility.BankResponse;
+import com.app.bank.utility.BankStatementResponse;
 import com.app.bank.utility.TransactionType;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,7 +40,9 @@ public class BankStatementServiceImpl implements BankStatementService {
 
     @Autowired
     private EmailService emailService;
-    private static final String FILE = "C:\\Users\\Lenovo\\Downloads\\BankStatements";
+
+    @Autowired
+    private BankStatementRepository bankStatementRepository;
 
     private BigDecimal totalAmountSpent = BigDecimal.ZERO;
 
@@ -45,21 +51,36 @@ public class BankStatementServiceImpl implements BankStatementService {
     private final String rupeeSymbol = "Rs. ";
 
     @Override
-    public List<Transaction> generateStatement(BankStatementDto bankStatementDto) {
+    public BankResponse generateStatement(BankStatementDto bankStatementDto) {
 
         LocalDate start = LocalDate.parse(bankStatementDto.getStartDate(), DateTimeFormatter.ISO_DATE);
         LocalDate end = LocalDate.parse(bankStatementDto.getEndDate(), DateTimeFormatter.ISO_DATE);
 
         List<Transaction> transactions = transactionRepository.findAll()
                 .stream().filter(transaction -> transaction.getAccountNumber().equals(bankStatementDto.getAccountNumber()))
-                .filter(transaction -> transaction.getCreatedAt().equals(start))
-                .filter(transaction -> transaction.getCreatedAt().equals(end)).toList();
+                .filter(transaction -> transaction.getCreatedAt().isAfter(start.minusDays(1)))
+                .filter(transaction -> transaction.getCreatedAt().isBefore(end.plusDays(1))).toList();
+
+        if(transactions.isEmpty()){
+            return BankResponse.builder()
+                    .responseCode(BankStatementResponse.NO_TRANSACTIONS_FOUND.getCode())
+                    .responseMessage(BankStatementResponse.NO_TRANSACTIONS_FOUND.getMessage())
+                    .build();
+        }
 
         User user = userRepository.findByAccountNumber(bankStatementDto.getAccountNumber());
 
         designStatement(transactions, bankStatementDto,user);
 
-        return transactions;
+        return BankResponse.builder()
+                .responseCode(BankStatementResponse.STATEMENT_GENERATED_SUCCESSFULLY.getCode())
+                .responseMessage(BankStatementResponse.STATEMENT_GENERATED_SUCCESSFULLY.getMessage())
+                .build();
+    }
+
+    @Override
+    public ResponseEntity<List<BankStatement>> getAllBankStatement(String accountNumber) {
+        return ResponseEntity.ok(bankStatementRepository.findAllByAccountNumber(accountNumber));
     }
 
     private void designStatement(List<Transaction> transactions,BankStatementDto bankStatementDto, User user) {
@@ -75,12 +96,12 @@ public class BankStatementServiceImpl implements BankStatementService {
         String timestamp = now.format(formatter);
 
         // Construct the file name with the timestamp
-        String fileName = FILE + "\\" + user.getAccountNumber().substring(0, 6) + "_" + timestamp + "_statement.pdf";
+        String fileName = user.getAccountNumber().substring(0, 6) + "_" + timestamp + "_statement.pdf";
 
         try{
-            OutputStream outputStream = new FileOutputStream(fileName);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-            PdfWriter.getInstance(document, outputStream);
+            PdfWriter.getInstance(document, byteArrayOutputStream);
 
             document.open();
 
@@ -296,8 +317,18 @@ public class BankStatementServiceImpl implements BankStatementService {
                                     "Banking System\n\n" +
                                     "This is a system generated mail, please do not reply."
                     )
-                    .attachments(fileName)
+                    .attachment(byteArrayOutputStream.toByteArray())
+                    .attachmentName(fileName)
                     .build();
+
+            BankStatement bankStatement = BankStatement.builder()
+                    .customerName(customerName)
+                    .accountNumber(user.getAccountNumber())
+                    .pdfFile(byteArrayOutputStream.toByteArray())
+                    .createdOn(LocalDateTime.now())
+                    .build();
+
+            bankStatementRepository.save(bankStatement);
 
             emailService.sendBankStatementViaEmail(emailDetails);
 

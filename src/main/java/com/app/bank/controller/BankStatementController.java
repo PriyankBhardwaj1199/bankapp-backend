@@ -1,21 +1,20 @@
 package com.app.bank.controller;
 
 import com.app.bank.dto.BankStatementDto;
-import com.app.bank.entity.Transaction;
+import com.app.bank.entity.BankStatement;
 import com.app.bank.service.BankStatementService;
+import com.app.bank.utility.BankResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/bankStatement")
-public class TransactionController {
+public class BankStatementController {
 
     @Autowired
     private BankStatementService bankStatementService;
@@ -29,7 +28,20 @@ public class TransactionController {
             description = "Statement pdf sent via email successfully"
     )
     @GetMapping
-    public List<Transaction> generateBankStatement(@RequestBody BankStatementDto bankStatementDto){
+    public BankResponse generateBankStatement(@RequestBody BankStatementDto bankStatementDto){
         return bankStatementService.generateStatement(bankStatementDto);
+    }
+
+    @Operation(
+            summary = "Get all bank statements for the user's account",
+            description = "Get the bank statements"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Statements fetched successfully"
+    )
+    @GetMapping("/{accountNumber}")
+    public ResponseEntity<List<BankStatement>> getAllBankStatement(@PathVariable String accountNumber){
+        return bankStatementService.getAllBankStatement(accountNumber);
     }
 }

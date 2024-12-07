@@ -3,16 +3,14 @@ package com.app.bank.serviceImpl;
 import com.app.bank.dto.EmailDetails;
 import com.app.bank.service.EmailService;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.util.ByteArrayDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
-import java.io.File;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -55,9 +53,9 @@ public class EmailServiceImpl implements EmailService {
             mimeMessageHelper.setText(emailDetails.getMessage());
             mimeMessageHelper.setSubject(emailDetails.getSubject());
 
-            FileSystemResource file = new FileSystemResource(new File(emailDetails.getAttachments()));
-
-            mimeMessageHelper.addAttachment(file.getFilename(),file);
+            if (emailDetails.getAttachment() != null) {
+                mimeMessageHelper.addAttachment(emailDetails.getAttachmentName(), new ByteArrayDataSource(emailDetails.getAttachment(), "application/pdf"));
+            }
 
             javaMailSender.send(mimeMessage);
 
