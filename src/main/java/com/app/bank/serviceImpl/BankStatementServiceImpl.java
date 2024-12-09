@@ -56,8 +56,8 @@ public class BankStatementServiceImpl implements BankStatementService {
         LocalDate start = LocalDate.parse(bankStatementDto.getStartDate(), DateTimeFormatter.ISO_DATE);
         LocalDate end = LocalDate.parse(bankStatementDto.getEndDate(), DateTimeFormatter.ISO_DATE);
 
-        List<Transaction> transactions = transactionRepository.findAll()
-                .stream().filter(transaction -> transaction.getAccountNumber().equals(bankStatementDto.getAccountNumber()))
+        List<Transaction> transactions = transactionRepository.findAllByAccountNumber(bankStatementDto.getAccountNumber())
+                .stream()
                 .filter(transaction -> transaction.getCreatedAt().isAfter(start.minusDays(1)))
                 .filter(transaction -> transaction.getCreatedAt().isBefore(end.plusDays(1))).toList();
 

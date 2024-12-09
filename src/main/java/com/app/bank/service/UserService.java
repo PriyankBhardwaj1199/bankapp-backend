@@ -25,5 +25,5 @@ public interface UserService {
 
     BankResponse updatePassword(PasswordRequest passwordRequest);
 
-    ResponseEntity<User> fetchUserAccount(FetchAccount fetchAccount);
+    ResponseEntity<User> fetchUserAccount(String email);
 }

@@ -6,7 +6,10 @@ import com.app.bank.repository.TransactionRepository;
 import com.app.bank.service.TransactionService;
 import com.app.bank.utility.TransactionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -24,5 +27,10 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
 
         transactionRepository.save(transaction);
+    }
+
+    @Override
+    public ResponseEntity<List<Transaction>> fetchTransactions(String accountNumber) {
+        return ResponseEntity.ok(transactionRepository.findAllByAccountNumber(accountNumber));
     }
 }

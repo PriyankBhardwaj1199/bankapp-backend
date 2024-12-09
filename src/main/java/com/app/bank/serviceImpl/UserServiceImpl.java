@@ -395,6 +395,7 @@ public class UserServiceImpl implements UserService {
     public BankResponse login(LoginDTO loginDTO) {
 
         Authentication authentication= null;
+        JwtResponse jwtResponse = new JwtResponse();
 
         try {
 
@@ -404,9 +405,23 @@ public class UserServiceImpl implements UserService {
                     )
             );
 
+            if(authentication.isAuthenticated()){
+                String jwtToken = jwtTokenProvider.generateToken(authentication);
+
+                jwtResponse.setToken(jwtToken);
+
+                userRepository.findByEmail(loginDTO.getUsername())
+                        .ifPresent(value -> {
+                            jwtResponse.setRoles(value.getRole());
+                            jwtResponse.setUserName(value.getEmail());
+                            jwtResponse.setAccountNumber(value.getAccountNumber());
+                        });
+            }
+
             return BankResponse.builder()
                     .responseCode(LoginStatus.SUCCESS.getCode())
-                    .responseMessage(jwtTokenProvider.generateToken(authentication))
+                    .responseMessage(LoginStatus.SUCCESS.getMessage())
+                    .jwtResponse(jwtResponse)
                     .build();
         } catch (BadCredentialsException e) {
             // Handle invalid credentials
@@ -591,9 +606,9 @@ Banking System
     }
 
     @Override
-    public ResponseEntity<User> fetchUserAccount(FetchAccount fetchAccount) {
+    public ResponseEntity<User> fetchUserAccount(String email) {
 
-        Optional<User> user = userRepository.findByEmail(fetchAccount.getEmail());
+        Optional<User> user = userRepository.findByEmail(email);
 
         return user.map(ResponseEntity::ok).orElse(null);
     }

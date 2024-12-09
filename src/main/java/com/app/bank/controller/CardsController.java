@@ -16,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/cards")
 @Tag(name = "Card API.")
+@CrossOrigin(origins = "http://localhost:4200")
 public class CardsController {
 
     @Autowired

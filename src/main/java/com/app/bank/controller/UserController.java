@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/user")
 @Tag(name = "User account management API's.")
+@CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
 
     @Autowired
@@ -144,8 +145,8 @@ public class UserController {
             responseCode = "200",
             description = "Account information fetched successfully"
     )
-    @GetMapping("/fetchAccount")
-    public ResponseEntity<User> getLoggedInUserAccountInfo(@RequestBody FetchAccount fetchAccount){
-        return userService.fetchUserAccount(fetchAccount);
+    @GetMapping("/fetchAccount/{email}")
+    public ResponseEntity<User> getLoggedInUserAccountInfo(@PathVariable String email){
+        return userService.fetchUserAccount(email);
     }
 }

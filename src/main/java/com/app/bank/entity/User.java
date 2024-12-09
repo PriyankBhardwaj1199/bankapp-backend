@@ -1,5 +1,6 @@
 package com.app.bank.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -109,6 +110,7 @@ public class User {
             name = "Password",
             description = "The password for the account"
     )
+    @JsonIgnore
     private String password;
 
     @Schema(

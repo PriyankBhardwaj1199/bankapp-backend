@@ -17,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin")
 @Tag(name = "Admin API's.")
+@CrossOrigin(origins = "http://localhost:4200")
 public class AdminController {
 
     @Autowired

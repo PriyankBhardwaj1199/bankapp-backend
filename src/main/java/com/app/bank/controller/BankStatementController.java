@@ -14,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/bankStatement")
+@CrossOrigin(origins = "http://localhost:4200")
 public class BankStatementController {
 
     @Autowired
