@@ -1,5 +1,6 @@
 package com.app.bank.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,6 +23,7 @@ public class Cards {
 
     private int cvv;
 
+    @JsonIgnore
     private int cardPin;
 
     private String name;

@@ -21,8 +21,9 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String transactionId;
     private String transactionType;
-    private BigDecimal amount;
     private String accountNumber;
+    private BigDecimal amount;
+    private BigDecimal runningBalance;
     private String status;
     @CreationTimestamp
     private LocalDate createdAt;

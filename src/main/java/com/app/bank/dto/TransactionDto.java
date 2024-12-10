@@ -14,7 +14,8 @@ import java.math.BigDecimal;
 public class TransactionDto {
 
     private String transactionType;
-    private BigDecimal amount;
     private String accountNumber;
+    private BigDecimal amount;
+    private BigDecimal runningBalance;
     private String status;
 }

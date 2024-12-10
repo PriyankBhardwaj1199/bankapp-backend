@@ -189,6 +189,7 @@ public class UserServiceImpl implements UserService {
                     .accountNumber(foundAccount.getAccountNumber())
                     .transactionType(TransactionType.DEPOSIT.getType())
                     .amount(creditAccountRequest.getAmount())
+                    .runningBalance(foundAccount.getAccountBalance())
                     .build();
 
             transactionService.saveTransaction(transactionDto);
@@ -244,6 +245,7 @@ public class UserServiceImpl implements UserService {
                         .accountNumber(foundAccount.getAccountNumber())
                         .transactionType(TransactionType.WITHDRAWAL.getType())
                         .amount(debitAccountRequest.getAmount())
+                        .runningBalance(foundAccount.getAccountBalance())
                         .build();
 
                 transactionService.saveTransaction(transactionDto);
@@ -358,12 +360,14 @@ public class UserServiceImpl implements UserService {
                     .accountNumber(sourceAccount.getAccountNumber())
                     .transactionType(TransactionType.TRANSFER.getType())
                     .amount(transferRequest.getAmount())
+                    .runningBalance(sourceAccount.getAccountBalance())
                     .build();
 
             TransactionDto transactionDtoReceiver = TransactionDto.builder()
                     .accountNumber(destinationAccount.getAccountNumber())
                     .transactionType(TransactionType.PAYMENT.getType())
                     .amount(transferRequest.getAmount())
+                    .runningBalance(destinationAccount.getAccountBalance())
                     .build();
 
             transactionService.saveTransaction(transactionDtoSender);
