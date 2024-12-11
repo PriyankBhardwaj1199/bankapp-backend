@@ -53,8 +53,8 @@ public class BankStatementServiceImpl implements BankStatementService {
     @Override
     public BankResponse generateStatement(BankStatementDto bankStatementDto) {
 
-        LocalDate start = LocalDate.parse(bankStatementDto.getStartDate(), DateTimeFormatter.ISO_DATE);
-        LocalDate end = LocalDate.parse(bankStatementDto.getEndDate(), DateTimeFormatter.ISO_DATE);
+        LocalDateTime start = LocalDate.parse(bankStatementDto.getStartDate(), DateTimeFormatter.ISO_DATE).atTime(0,0,0);
+        LocalDateTime end = LocalDate.parse(bankStatementDto.getEndDate(), DateTimeFormatter.ISO_DATE).atTime(23,59,59);
 
         List<Transaction> transactions = transactionRepository.findAllByAccountNumberOrderByCreatedAtDesc(bankStatementDto.getAccountNumber())
                 .stream()
@@ -80,7 +80,7 @@ public class BankStatementServiceImpl implements BankStatementService {
 
     @Override
     public ResponseEntity<List<BankStatement>> getAllBankStatement(String accountNumber) {
-        return ResponseEntity.ok(bankStatementRepository.findAllByAccountNumber(accountNumber));
+        return ResponseEntity.ok(bankStatementRepository.findAllByAccountNumberOrderByCreatedOnDesc(accountNumber));
     }
 
     private void designStatement(List<Transaction> transactions,BankStatementDto bankStatementDto, User user) {
@@ -94,6 +94,8 @@ public class BankStatementServiceImpl implements BankStatementService {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MM_HH_mm"); // Format: date_month_hours_minutes
         String timestamp = now.format(formatter);
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
         // Construct the file name with the timestamp
         String fileName = user.getAccountNumber().substring(0, 6) + "_" + timestamp + "_statement.pdf";
@@ -197,7 +199,7 @@ public class BankStatementServiceImpl implements BankStatementService {
             Font bodyFont = new Font(Font.FontFamily.HELVETICA, 9, Font.NORMAL, BaseColor.BLACK);
 
             transactions.forEach(transaction -> {
-                PdfPCell dateCell = new PdfPCell(new Phrase(transaction.getCreatedAt().toString(), bodyFont));
+                PdfPCell dateCell = new PdfPCell(new Phrase(transaction.getCreatedAt().format(dateFormatter), bodyFont));
                 dateCell.setBorder(Rectangle.BOTTOM);
                 dateCell.setHorizontalAlignment(Element.ALIGN_CENTER); // Align center
                 dateCell.setPadding(5f);

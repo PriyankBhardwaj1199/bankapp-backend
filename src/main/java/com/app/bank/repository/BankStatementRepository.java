@@ -10,5 +10,5 @@ import java.util.List;
 @Repository
 @Transactional
 public interface BankStatementRepository extends JpaRepository<BankStatement,Long> {
-    List<BankStatement> findAllByAccountNumber(String accountNumber);
+    List<BankStatement> findAllByAccountNumberOrderByCreatedOnDesc(String accountNumber);
 }
