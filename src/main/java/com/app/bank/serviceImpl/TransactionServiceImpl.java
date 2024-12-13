@@ -5,6 +5,7 @@ import com.app.bank.entity.Transaction;
 import com.app.bank.repository.TransactionRepository;
 import com.app.bank.repository.UserRepository;
 import com.app.bank.service.TransactionService;
+import com.app.bank.utility.BankResponse;
 import com.app.bank.utility.TransactionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -49,4 +50,28 @@ public class TransactionServiceImpl implements TransactionService {
     public ResponseEntity<List<Transaction>> fetchTransactions(String accountNumber) {
         return ResponseEntity.ok(transactionRepository.findAllByAccountNumberOrderByCreatedAtDesc(accountNumber));
     }
+
+    @Override
+    public BankResponse deleteTransaction(String transactionId) {
+        // check if transaction exists
+
+        Optional<Transaction> transaction = transactionRepository.findByTransactionId(transactionId);
+
+        if(transaction.isEmpty()) {
+            return BankResponse.builder()
+                    .responseCode(TransactionResponse.TRANSACTION_NOT_FOUND.getCode())
+                    .responseMessage(TransactionResponse.TRANSACTION_NOT_FOUND.getMessage())
+                    .build();
+        }
+
+        Transaction deleteTransaction = transaction.get();
+
+        transactionRepository.deleteByTransactionId(deleteTransaction.getTransactionId());
+
+        return BankResponse.builder()
+                .responseCode(TransactionResponse.DELETED.getCode())
+                .responseMessage(TransactionResponse.DELETED.getMessage())
+                .build();
+    }
 }
+

@@ -4,6 +4,8 @@ public enum TransactionResponse {
     SUCCESS(200, "COMPLETED"),
     PENDING(202, "PENDING"),
     FAILED(400, "FAILED"),
+    DELETED(200, "Transaction deleted successfully."),
+    TRANSACTION_NOT_FOUND(404, "Transaction not found"),
     INSUFFICIENT_FUNDS(402, "Transaction failed due to insufficient funds."),
     UNAUTHORIZED(401, "Unauthorized transaction."),
     ACCOUNT_NOT_FOUND(404, "Account not found."),
