@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @RestController
@@ -44,5 +45,18 @@ public class BankStatementController {
     @GetMapping("/{accountNumber}")
     public ResponseEntity<List<BankStatement>> getAllBankStatement(@PathVariable String accountNumber){
         return bankStatementService.getAllBankStatement(accountNumber);
+    }
+
+    @Operation(
+            summary = "Download bank statement for the user's account",
+            description = "Downloads the bank statement"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Statements downloaded successfully"
+    )
+    @GetMapping("/download/{accountNumber}/{id}")
+    public ResponseEntity<byte[]> downloadBankStatement(@PathVariable String accountNumber,@PathVariable Long id) throws SQLException {
+        return bankStatementService.downloadBankStatement(accountNumber,id);
     }
 }

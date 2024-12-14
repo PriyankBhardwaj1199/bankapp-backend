@@ -18,16 +18,18 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BankStatementServiceImpl implements BankStatementService {
@@ -81,6 +83,21 @@ public class BankStatementServiceImpl implements BankStatementService {
     @Override
     public ResponseEntity<List<BankStatement>> getAllBankStatement(String accountNumber) {
         return ResponseEntity.ok(bankStatementRepository.findAllByAccountNumberOrderByCreatedOnDesc(accountNumber));
+    }
+
+    @Override
+    public ResponseEntity<byte[]> downloadBankStatement(String accountNumber,Long id) throws SQLException {
+
+        Optional<byte[]> pdfFile = bankStatementRepository.getPdfFileByIdAndAccountNumber(id,accountNumber);
+        HttpHeaders headers = new HttpHeaders();
+        byte[] fileContent = null;
+        if(pdfFile.isPresent()){
+            fileContent = pdfFile.get();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(ContentDisposition.attachment().filename(accountNumber+"_"+LocalDateTime.now()).build());
+            return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(new byte[0], headers, HttpStatus.OK);
     }
 
     private void designStatement(List<Transaction> transactions,BankStatementDto bankStatementDto, User user) {

@@ -324,6 +324,7 @@ public class UserServiceImpl implements UserService {
     public BankResponse transferRequest(TransferRequest transferRequest) {
 
         // check existence of source account and destination account
+        System.out.println(transferRequest);
 
         Boolean isSourceAccountExist = userRepository.existsByAccountNumber(transferRequest.getSourceAccountNumber());
         Boolean isDestinationAccountExist = userRepository.existsByAccountNumber(transferRequest.getDestinationAccountNumber());
