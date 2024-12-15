@@ -17,4 +17,6 @@ public interface BankStatementRepository extends JpaRepository<BankStatement,Lon
 
     @Query("SELECT b.pdfFile FROM BankStatement b WHERE b.id = :id AND b.accountNumber = :accountNumber")
     Optional<byte[]> getPdfFileByIdAndAccountNumber(@Param("id") Long id,@Param("accountNumber") String accountNumber);
+
+    Optional<BankStatement> findByAccountNumberAndId(String accountNumber,Long Id);
 }

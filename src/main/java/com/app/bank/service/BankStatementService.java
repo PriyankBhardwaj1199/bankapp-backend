@@ -15,4 +15,6 @@ public interface BankStatementService {
     ResponseEntity<List<BankStatement>> getAllBankStatement(String accountNumber);
 
     ResponseEntity<byte[]> downloadBankStatement(String accountNumber,Long id) throws SQLException;
+
+    BankResponse deleteBankStatement(String accountNumber, Long id);
 }

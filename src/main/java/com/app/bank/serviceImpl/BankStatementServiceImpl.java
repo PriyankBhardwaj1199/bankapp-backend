@@ -100,6 +100,26 @@ public class BankStatementServiceImpl implements BankStatementService {
         return new ResponseEntity<>(new byte[0], headers, HttpStatus.OK);
     }
 
+    @Override
+    public BankResponse deleteBankStatement(String accountNumber, Long id) {
+
+        Optional<BankStatement> isStatement = bankStatementRepository.findByAccountNumberAndId(accountNumber, id);
+
+        if(isStatement.isEmpty()){
+            return BankResponse.builder()
+                    .responseCode(BankStatementResponse.STATEMENT_NOT_FOUND.getCode())
+                    .responseMessage(BankStatementResponse.STATEMENT_NOT_FOUND.getMessage())
+                    .build();
+        }
+
+        bankStatementRepository.delete(isStatement.get());
+
+        return BankResponse.builder()
+                .responseCode(BankStatementResponse.STATEMENT_DELETED_SUCCESSFULLY.getCode())
+                .responseMessage(BankStatementResponse.STATEMENT_DELETED_SUCCESSFULLY.getMessage())
+                .build();
+    }
+
     private void designStatement(List<Transaction> transactions,BankStatementDto bankStatementDto, User user) {
         Rectangle documentSize = new Rectangle(PageSize.A4);
         Document document = new Document(documentSize);

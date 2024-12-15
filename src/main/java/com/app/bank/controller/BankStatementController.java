@@ -29,7 +29,7 @@ public class BankStatementController {
             responseCode = "200",
             description = "Statement pdf sent via email successfully"
     )
-    @GetMapping
+    @PostMapping("/generate")
     public BankResponse generateBankStatement(@RequestBody BankStatementDto bankStatementDto){
         return bankStatementService.generateStatement(bankStatementDto);
     }
@@ -45,6 +45,19 @@ public class BankStatementController {
     @GetMapping("/{accountNumber}")
     public ResponseEntity<List<BankStatement>> getAllBankStatement(@PathVariable String accountNumber){
         return bankStatementService.getAllBankStatement(accountNumber);
+    }
+
+    @Operation(
+            summary = "Delete statement for the user's account",
+            description = "Delete statement"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Statement deleted successfully"
+    )
+    @DeleteMapping("/{accountNumber}/{id}")
+    public BankResponse deleteBankStatement(@PathVariable String accountNumber,@PathVariable Long id){
+        return bankStatementService.deleteBankStatement(accountNumber,id);
     }
 
     @Operation(
