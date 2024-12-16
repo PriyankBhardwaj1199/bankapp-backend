@@ -37,11 +37,8 @@ public class AccountUtils {
 
         String cardNumber = null;
 
-        int cardLength = 12;
+        int cardLength = 16;
 
-        if(cardsRequest.getCardType().equalsIgnoreCase(CardType.CREDIT.getName())){
-            cardLength = 16;
-        }
 
         if(cardsRequest.getCardSubType().equalsIgnoreCase(CardType.VISA.getName())){
             cardNumber = getCardNumber(CardType.VISA.getPrefix(),cardLength);
