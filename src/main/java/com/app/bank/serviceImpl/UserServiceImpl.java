@@ -420,6 +420,7 @@ public class UserServiceImpl implements UserService {
                             jwtResponse.setRoles(value.getRole());
                             jwtResponse.setUserName(value.getEmail());
                             jwtResponse.setAccountNumber(value.getAccountNumber());
+                            jwtResponse.setName(value.getFirstName()+" "+value.getLastName());
                         });
             }
 
