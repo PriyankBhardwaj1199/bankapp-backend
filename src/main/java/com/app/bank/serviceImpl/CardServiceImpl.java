@@ -62,7 +62,6 @@ public class CardServiceImpl implements CardService {
             return invalidCardResponse;
         }
 
-
         userCard.setCardPin(cardsRequest.getCardPin());
         userCard.setPinStatus(CardState.PIN_GENERATED.getDescription());
 
@@ -249,6 +248,35 @@ public class CardServiceImpl implements CardService {
         return BankResponse.builder()
                 .responseCode(CardsResponse.CARD_EXPIRED_SUCCESSFULLY.getCode())
                 .responseMessage(CardsResponse.CARD_EXPIRED_SUCCESSFULLY.getMessage())
+                .build();
+    }
+
+    @Override
+    public BankResponse unblockCard(CardsRequest cardsRequest) {
+        Optional<Cards> card = cardsRepository.findByCardNumberAndAccountNumber(cardsRequest.getCardNumber(), cardsRequest.getAccountNumber());
+
+        if(card.isEmpty()) {
+            return BankResponse.builder()
+                    .responseCode(CardsResponse.CARD_NOT_FOUND.getCode())
+                    .responseMessage(CardsResponse.CARD_NOT_FOUND.getMessage())
+                    .build();
+        }
+
+        Cards userCard = card.get();
+
+        if(userCard.getCardStatus().equalsIgnoreCase(CardState.ACTIVE.getDescription())){
+            return BankResponse.builder()
+                    .responseCode(CardsResponse.CARD_ALREADY_ACTIVE.getCode())
+                    .responseMessage(CardsResponse.CARD_ALREADY_ACTIVE.getMessage())
+                    .build();
+        }
+
+        userCard.setCardStatus(CardState.ACTIVE.getDescription());
+        cardsRepository.save(userCard);
+
+        return BankResponse.builder()
+                .responseCode(CardsResponse.CARD_ACTIVATED_SUCCESSFULLY.getCode())
+                .responseMessage(CardsResponse.CARD_ACTIVATED_SUCCESSFULLY.getMessage())
                 .build();
     }
 }

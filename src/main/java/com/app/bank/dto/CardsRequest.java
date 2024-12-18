@@ -17,7 +17,7 @@ public class CardsRequest {
 
     private int cvv;
 
-    private int cardPin;
+    private String cardPin;
 
     private String cardType;
 

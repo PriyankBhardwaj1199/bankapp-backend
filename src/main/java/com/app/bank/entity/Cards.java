@@ -24,7 +24,7 @@ public class Cards {
     private int cvv;
 
     @JsonIgnore
-    private int cardPin;
+    private String cardPin;
 
     private String name;
 

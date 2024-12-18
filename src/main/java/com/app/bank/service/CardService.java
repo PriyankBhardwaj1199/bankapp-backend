@@ -17,4 +17,5 @@ public interface CardService {
     BankResponse deleteCard(CardsRequest cardsRequest);
     BankResponse revokeCard(CardsRequest cardsRequest);
     BankResponse expireCard(CardsRequest cardsRequest);
+    BankResponse unblockCard(CardsRequest cardsRequest);
 }

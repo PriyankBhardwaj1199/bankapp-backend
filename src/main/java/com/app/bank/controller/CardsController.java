@@ -73,4 +73,17 @@ public class CardsController {
     public BankResponse blockCard(@RequestBody CardsRequest cardsRequest) {
         return cardService.blockCard(cardsRequest);
     }
+
+    @Operation(
+            summary = "Block card",
+            description = "Let's user block card"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Card block successful"
+    )
+    @PostMapping("/unblock")
+    public BankResponse unblockCard(@RequestBody CardsRequest cardsRequest) {
+        return cardService.unblockCard(cardsRequest);
+    }
 }

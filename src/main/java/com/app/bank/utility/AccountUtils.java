@@ -63,7 +63,7 @@ public class AccountUtils {
                 .pinStatus(CardState.PIN_PENDING.getDescription())
                 .cardStatus(CardState.PENDING_ACTIVATION.getDescription())
                 .accountNumber(cardsRequest.getAccountNumber())
-                .cardPin(0)
+                .cardPin("")
                 .cardNumber(cardNumber)
                 .expiryDate(expiryDate)
                 .issuedDate(issuedDate)
