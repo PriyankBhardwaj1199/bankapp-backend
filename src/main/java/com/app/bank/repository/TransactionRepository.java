@@ -19,4 +19,5 @@ public interface TransactionRepository extends JpaRepository<Transaction,String>
     List<Transaction> findAllByAccountNumberOrderByCreatedAtDesc(String accountNumber);
 
     Optional<Transaction> findByTransactionId(String transactionId);
+
 }

@@ -20,4 +20,7 @@ public interface CardsRepository extends JpaRepository<Cards,String> {
 
     List<Cards> findAllByCardStatus(String cardStatus);
 
+    long countByCardStatus(String cardStatus);
+
+    long countByCardTypeAndCardStatus(String cardType, String cardStatus);
 }

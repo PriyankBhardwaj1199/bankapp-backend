@@ -1,15 +1,16 @@
 package com.app.bank.serviceImpl;
 
 import com.app.bank.dto.CardsRequest;
+import com.app.bank.dto.Statistics;
 import com.app.bank.entity.Cards;
 import com.app.bank.entity.User;
+import com.app.bank.repository.BankStatementRepository;
 import com.app.bank.repository.CardsRepository;
+import com.app.bank.repository.TransactionRepository;
 import com.app.bank.repository.UserRepository;
 import com.app.bank.service.AdminService;
 import com.app.bank.service.CardService;
-import com.app.bank.utility.BankResponse;
-import com.app.bank.utility.CardState;
-import com.app.bank.utility.CardsResponse;
+import com.app.bank.utility.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,12 @@ public class AdminServiceImpl implements AdminService {
     private CardsRepository cardsRepository;
 
     @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    private BankStatementRepository bankStatementRepository;
+
+    @Autowired
     private CardService cardService;
 
     @Override
@@ -34,8 +41,8 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ResponseEntity<List<Cards>> fetchAllPendingCards() {
-        return ResponseEntity.ok(cardsRepository.findAllByCardStatus(CardState.PENDING_ACTIVATION.getDescription()));
+    public ResponseEntity<List<Cards>> fetchAllCards() {
+        return ResponseEntity.ok(cardsRepository.findAll());
     }
 
     @Override
@@ -69,5 +76,20 @@ public class AdminServiceImpl implements AdminService {
         }
 
 
+    }
+
+    @Override
+    public Statistics fetchStatistics() {
+        Statistics stats = new Statistics();
+
+        stats.setActiveUsers(userRepository.countByStatus(AccountStatus.ACTIVE.getDescription()));
+        stats.setTotalUsers(userRepository.count());
+        stats.setPendingAccountApprovals(userRepository.countByStatus(AccountStatus.PENDING.getDescription()));
+        stats.setPendingCardApprovals(cardsRepository.countByCardStatus(CardState.PENDING_ACTIVATION.getDescription()));
+        stats.setTotalTransactions(transactionRepository.count());
+        stats.setActiveDebitCards(cardsRepository.countByCardTypeAndCardStatus(CardType.DEBIT.getName(),CardState.ACTIVE.getDescription()));
+        stats.setActiveCreditCards(cardsRepository.countByCardTypeAndCardStatus(CardType.CREDIT.getName(), CardState.ACTIVE.getDescription()));
+        stats.setTotalBankStatements(bankStatementRepository.count());
+        return stats;
     }
 }

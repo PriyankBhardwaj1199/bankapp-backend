@@ -27,4 +27,6 @@ public interface UserRepository extends JpaRepository<User,Long> {
     @Query("SELECT u.accountBalance FROM User u WHERE u.accountNumber = :accountNumber")
     Optional<BigDecimal> findAccountBalanceByAccountNumber(@Param("accountNumber") String accountNumber);
 
+    long countByStatus(String status);
+
 }

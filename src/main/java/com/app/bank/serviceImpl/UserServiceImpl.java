@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(userDto.getPassword()))
                 .role(roleAssigned)
                 .alternativePhoneNumber(userDto.getAlternativePhoneNumber())
-                .status(AccountStatus.ACTIVE.getDescription())
+                .status(AccountStatus.PENDING.getDescription())
                 .accountNumber(AccountUtils.generateAccountNumber(userDto.getFirstName().substring(0, 1).toUpperCase()
                         +userDto.getLastName().substring(0, 1).toUpperCase()))
                 .accountBalance(BigDecimal.ZERO)
