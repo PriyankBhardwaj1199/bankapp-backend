@@ -1,6 +1,7 @@
 package com.app.bank.controller;
 
 import com.app.bank.dto.CardsRequest;
+import com.app.bank.dto.FetchAccount;
 import com.app.bank.dto.Statistics;
 import com.app.bank.entity.Cards;
 import com.app.bank.entity.User;
@@ -51,17 +52,31 @@ public class AdminController {
     }
 
     @Operation(
-            summary = "Fetch all pending card approval",
-            description = "Returns all pending card information"
+            summary = "Admin actions on card",
+            description = "Returns action information"
     )
     @ApiResponse(
             responseCode = "200",
-            description = "All pending card information fetched successfully"
+            description = "All actions performed successfully"
     )
     @PostMapping("/card/action/{action}")
     public BankResponse actionOnCard(@RequestBody CardsRequest cardsRequest, @PathVariable String action){
         return adminService.actionOnCard(cardsRequest, action.toUpperCase());
     }
+
+    @Operation(
+            summary = "Admin actions on account",
+            description = "Returns action information"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "All actions performed successfully"
+    )
+    @PostMapping("/account/action/{action}")
+    public BankResponse actionOnAccount(@RequestBody FetchAccount account, @PathVariable String action){
+        return adminService.actionOnAccount(account, action.toUpperCase());
+    }
+
 
     @Operation(
             summary = "Fetch all statistical information",

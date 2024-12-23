@@ -21,4 +21,5 @@ public interface CardsRepository extends JpaRepository<Cards,String> {
     long countByCardStatus(String cardStatus);
 
     long countByCardTypeAndCardStatus(String cardType, String cardStatus);
+
 }

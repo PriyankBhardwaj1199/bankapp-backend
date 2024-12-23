@@ -22,6 +22,8 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByEmailAndAccountNumber(String email,String accountNumber);
+
     int deleteByAccountNumber(String accountNumber);
 
     @Query("SELECT u.accountBalance FROM User u WHERE u.accountNumber = :accountNumber")
