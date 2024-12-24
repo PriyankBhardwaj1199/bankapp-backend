@@ -8,9 +8,11 @@ import com.app.bank.utility.AccountStatus;
 import com.app.bank.utility.BankResponse;
 import com.app.bank.utility.UpdateAccountResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
 public class AccountServiceImpl implements AccountService {
 
     @Autowired
